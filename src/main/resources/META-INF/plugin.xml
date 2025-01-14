@@ -1,18 +1,22 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
     <id>com.github.xepozz.phplsp</id>
-    <name>php-lsp</name>
+    <name>PHP LSP</name>
     <vendor>xepozz</vendor>
 
     <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.ultimate</depends>
 
     <resource-bundle>messages.MyBundle</resource-bundle>
 
     <extensions defaultExtensionNs="com.intellij">
-        <toolWindow factoryClass="com.github.xepozz.phplsp.toolWindow.MyToolWindowFactory" id="MyToolWindow"/>
+        <platform.lsp.serverSupportProvider implementation="com.github.xepozz.phplsp.PhpLspServerSupportProvider"/>
+        <projectConfigurable id="settings.php_lsp"
+                             groupId="language"
+                             instance="com.github.xepozz.phplsp.PhpLspSettingsConfigurable"
+                             bundle="messages.MyBundle"
+                             key="settings.configurable.title"
+                             nonDefaultProject="true"
+        />
     </extensions>
-
-    <applicationListeners>
-        <listener class="com.github.xepozz.phplsp.listeners.MyApplicationActivationListener" topic="com.intellij.openapi.application.ApplicationActivationListener"/>
-    </applicationListeners>
 </idea-plugin>
