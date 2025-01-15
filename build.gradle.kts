@@ -16,7 +16,10 @@ version = providers.gradleProperty("pluginVersion").get()
 
 // Set the JVM language level used to build the project.
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+        vendor = JvmVendorSpec.JETBRAINS
+    }
 }
 
 // Configure project's dependencies
@@ -26,6 +29,7 @@ repositories {
     // IntelliJ Platform Gradle Plugin Repositories Extension - read more: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-repositories-extension.html
     intellijPlatform {
         defaultRepositories()
+        jetbrainsRuntime()
     }
 }
 
@@ -43,10 +47,10 @@ dependencies {
         // Plugin Dependencies. Uses `platformPlugins` property from the gradle.properties file for plugin from JetBrains Marketplace.
         plugins(providers.gradleProperty("platformPlugins").map { it.split(',') })
 
+        jetbrainsRuntime()
         pluginVerifier()
         zipSigner()
         testFramework(TestFrameworkType.Platform)
-//        intellijIdeaUltimate("2024.3.1.1")
     }
 }
 
@@ -83,7 +87,7 @@ intellijPlatform {
 
         ideaVersion {
             sinceBuild = providers.gradleProperty("pluginSinceBuild")
-            untilBuild = providers.gradleProperty("pluginUntilBuild")
+            untilBuild = provider { null }
         }
     }
 
@@ -126,10 +130,16 @@ kover {
 }
 
 tasks {
+    runIde {
+        autoReload = true
+        systemProperty("idea.auto.reload.plugins", true)
+    }
     wrapper {
         gradleVersion = providers.gradleProperty("gradleVersion").get()
     }
-
+    buildSearchableOptions {
+        enabled = false
+    }
     publishPlugin {
         dependsOn(patchChangelog)
     }
