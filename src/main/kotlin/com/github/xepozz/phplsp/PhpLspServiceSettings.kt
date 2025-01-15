@@ -7,14 +7,24 @@ import com.intellij.openapi.project.Project
 import com.intellij.platform.lsp.api.LspServerManager
 
 @Service(Service.Level.PROJECT)
-@State(name = "PrismaServiceSettings", storages = [Storage(StoragePathMacros.WORKSPACE_FILE)])
-class LspServiceSettings(val project: Project) :
+@State(name = "PhpLspServiceSettings", storages = [Storage(StoragePathMacros.WORKSPACE_FILE)])
+class PhpLspServiceSettings(val project: Project) :
     SimplePersistentStateComponent<LspServiceState>(LspServiceState()) {
-    var serviceMode
-        get() = state.serviceMode
+    var enabled
+        get() = state.enabled
         set(value) {
-            val changed = state.serviceMode != value
-            state.serviceMode = value
+            val changed = state.enabled != value
+            state.enabled = value
+            if (changed) {
+                restartPhpLspServerAsync(project)
+            }
+        }
+
+    var runCommand
+        get() = state.runCommand
+        set(value) {
+            val changed = state.runCommand != value
+            state.runCommand = value
             if (changed) {
                 restartPhpLspServerAsync(project)
             }
@@ -51,18 +61,19 @@ class LspServiceSettings(val project: Project) :
         }
 
     companion object {
-        fun getInstance(project: Project) = project.service<LspServiceSettings>()
+        fun getInstance(project: Project) = project.service<PhpLspServiceSettings>()
     }
 }
 
 class LspServiceState : BaseState() {
-    var serviceMode by enum(LspServiceMode.ENABLED)
+    var runCommand by property(true)
+    var enabled by property(true)
     var binary by string("/bin/lsp")
-    var command by string("serve App\\\\Application --port=%d")
+    var command by string("serve App\\\\Application --port=%port%")
     var port by property(5007)
 }
 
-enum class LspServiceMode {
+enum class BooleanOption {
     ENABLED,
     DISABLED
 }
